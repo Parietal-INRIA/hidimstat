@@ -38,6 +38,7 @@ jobs:
             command: |
               python -m pip install --progress-bar off --upgrade pip setuptools wheel
               python -m pip install --progress-bar off -r doc/doc-requirements.txt
+              python -m pip install --progress-bar off --upgrade pytest coverage
               python -m pip install -e .
               echo "localhost slots=50">hostfile
         - run:
@@ -50,6 +51,13 @@ jobs:
                QT_DEBUG_PLUGINS=1 mne sys_info
                python -c "import numpy; numpy.show_config()"
                LIBGL_DEBUG=verbose python -c "import pyvistaqt; pyvistaqt.BackgroundPlotter(show=True)"
+        - run:
+            name: run test
+            no_output_timeout: 30m
+            command: |
+              coverage run -m pytest;
+              coverage report;
+              coverage html;
         - run:
             name: make html
             no_output_timeout: 30m
