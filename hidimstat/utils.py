@@ -86,3 +86,19 @@ def _adaptive_quantile_aggregation(pvals, gamma_min=0.05):
         _fixed_quantile_aggregation(pvals, gamma) for gamma in gammas])
 
     return np.minimum(1, (1 - np.log(gamma_min)) * list_Q.min(0))
+
+
+def _lambda_max(X, y, use_noise_estimate=True):
+    """Calculation of lambda_max, the smallest value of regularization parameter in
+    lasso program for non-zero coefficient
+    """
+    n_samples, _ = X.shape
+
+    if not use_noise_estimate:
+        return np.max(np.dot(X.T, y)) / n_samples
+
+    norm_y = np.linalg.norm(y, ord=2)
+    sigma_0 = (norm_y / np.sqrt(n_samples)) * 1e-3
+    sig_star = max(sigma_0, norm_y / np.sqrt(n_samples))
+
+    return np.max(np.abs(np.dot(X.T, y)) / (n_samples * sig_star))
