@@ -4,16 +4,13 @@ resampling-free is implemented.
 """
 import numpy as np
 from joblib import Parallel, delayed
-from hidimstat.utils import _lambda_max, fdr_threshold, quantile_aggregation
+from hidimstat.utils import _lambda_max, fdr_threshold
 from scipy import stats
 from sklearn.base import clone
 from sklearn.ensemble import (RandomForestRegressor,
                               RandomForestClassifier)
 from sklearn.linear_model import (Lasso, LassoCV)
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.utils import check_random_state, resample
-from sklearn.utils.validation import check_memory
 
 
 def dcrt_zero(X, y, fdr=0.1, estimated_coef=None, Sigma_X=None, cv=5,
@@ -107,69 +104,6 @@ def dcrt_zero(X, y, fdr=0.1, estimated_coef=None, Sigma_X=None, cv=5,
 
     if verbose:
         return selected, pvals, Ts
-
-    return selected
-
-
-def dcrt_zero_aggregation(X, y, fdr=0.1, n_bootstraps=5, alpha=None,
-                          Sigma_X=None, cv=5, n_regus=20, refit=False,
-                          loss='least_square', solver='liblinear',
-                          max_iter=1e3, centered=True, gamma=0.5, use_cv=False,
-                          screening=True, screening_threshold=1e-1,
-                          gamma_min=0.05, fdr_control='bhq',
-                          statistic='residual', adaptive_aggregation=True,
-                          n_jobs=1, dcrt_n_jobs=1, joblib_verbose=0,
-                          verbose=False, train_size=0.8, memory=None,
-                          random_state=None):
-    """Aggregation of p-values output by resampling-free d0-CRT
-    """
-    if centered:
-        X = StandardScaler().fit_transform(X)
-
-    n_samples, _ = X.shape
-
-    rng = check_random_state(random_state)
-    rands = rng.randint(1, np.iinfo(np.int32).max, n_bootstraps)
-
-    if train_size is None:
-        train_size = 1.0
-
-    train_indices = [
-        resample(np.arange(n_samples),
-                 n_samples=int(n_samples * train_size),
-                 replace=False,
-                 random_state=rand) for rand in rands]
-
-    mem = check_memory(memory)
-    dcrt_zero_cached = mem.cache(dcrt_zero, ignore=['n_jobs', 'verbose'])
-
-    if n_bootstraps == 1:
-        return dcrt_zero_cached(
-            X, y, fdr=fdr, Sigma_X=Sigma_X, max_iter=max_iter, use_cv=use_cv,
-            refit=refit, screening=screening, cv=cv, n_regus=n_regus,
-            screening_threshold=screening_threshold, statistic=statistic,
-            centered=centered, n_jobs=n_jobs, loss=loss, solver=solver,
-            verbose=verbose,
-            alpha=alpha)
-
-    parallel = Parallel(n_jobs, verbose=joblib_verbose)
-    temps = parallel(delayed(dcrt_zero_cached)(
-        X[idx, :], y[idx], max_iter=max_iter, use_cv=use_cv, refit=refit,
-        screening=screening, Sigma_X=Sigma_X, cv=cv, n_regus=n_regus,
-        screening_threshold=screening_threshold, statistic=statistic,
-        centered=centered, n_jobs=dcrt_n_jobs, loss=loss, solver=solver,
-        verbose=True, alpha=alpha)
-        for idx in train_indices)
-
-    pvals = np.array([temps[i][1] for i in range(n_bootstraps)])
-    aggregated_pvals = quantile_aggregation(
-        pvals, gamma=gamma, gamma_min=gamma_min, adaptive=adaptive_aggregation)
-
-    threshold = fdr_threshold(aggregated_pvals, fdr=fdr, method=fdr_control)
-    selected = np.where(aggregated_pvals <= threshold)[0]
-
-    if verbose:
-        return selected, aggregated_pvals, np.array(pvals)
 
     return selected
 
@@ -283,7 +217,6 @@ def _rf_distillation(X, y, idx, Sigma_X=None, coef_full=None, cv=3,
         clf.fit(X_minus_idx, y)
         eps_res = y - clf.predict(X_minus_idx)
         sigma2_y = np.mean(eps_res ** 2)
-        score_dis_y = r2_score(y_test, clf.predict(X_test_minus_idx))
 
     elif type_prob == 'classification':
         clf = RandomForestClassifier(n_estimators=ntree)

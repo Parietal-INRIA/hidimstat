@@ -1,5 +1,5 @@
 from .clustered_inference import clustered_inference, hd_inference
-from .dcrt import dcrt_zero, dcrt_zero_aggregation
+from .dcrt import dcrt_zero
 from .desparsified_lasso import desparsified_lasso, desparsified_group_lasso
 from .ensemble_clustered_inference import ensemble_clustered_inference
 from .adaptive_permutation_threshold import ada_svr
@@ -15,7 +15,6 @@ __all__ = [
     'aggregate_quantiles',
     'clustered_inference',
     'dcrt_zero',
-    'dcrt_aggregation',
     'desparsified_lasso',
     'desparsified_group_lasso',
     'ensemble_clustered_inference',
