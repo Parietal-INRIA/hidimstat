@@ -8,11 +8,12 @@ the power
 import numpy as np
 import matplotlib.pyplot as plt
 from hidimstat.dcrt import dcrt_zero
+from hidimstat.scenario import multivariate_1D_simulation
 
 typeI_error = {"Lasso": [], "Forest": []}
 power = {"Lasso": [], "Forest": []}
 
-for sim_ind in range(100):
+for sim_ind in range(10):
     print(f"Processing: {sim_ind+1}")
     np.random.seed(sim_ind)
 
@@ -29,35 +30,11 @@ for sim_ind in range(100):
     # Nominal false positive rate
     alpha = 5e-2
 
-    # Create Correlation matrix
-    cov_matrix = np.zeros((p, p))
-    for i in range(p):
-        for j in range(p):
-            if i != j:
-                cov_matrix[i, j] = rho
-            else:
-                cov_matrix[i, j] = 1
+    X, y, _, __ = multivariate_1D_simulation(n_samples=n, n_features=p,
+                                             support_size=n_signal,
+                                             rho=rho, seed=sim_ind)
 
-    # Generation of the predictors
-    X = np.random.multivariate_normal(mean=np.zeros(p), cov=cov_matrix, size=n)
-
-    # Random choice of the relevant variables
-    list_var = np.random.choice(p, n_signal, replace=False)
-    reorder_var = np.array([i for i in range(p) if i not in list_var])
-
-    # Reorder data matrix so that first n_signal predictors
-    # are the signal predictors
-    X = X[:, np.concatenate([list_var, reorder_var], axis=0)]
-
-    # Random choice of the coefficients for the signal
-    effectset = np.array([-0.5, -1, -2, -3, 0.5, 1, 2, 3])
-    betas = np.random.choice(effectset, n_signal)
-
-    prod_signal = np.dot(X[:, :n_signal], betas)
-    sigma_noise = np.linalg.norm(prod_signal) / (snr * np.sqrt(X.shape[0]))
-
-    # Generation of the outcome
-    y = prod_signal + sigma_noise * np.random.normal(0, 1, size=X.shape[0])
+    # Applying a reLu function on the outcome y to get non-linear relationships
     y = np.array([max(0.0, i) for i in y])
 
     ## dcrt Lasso ##
@@ -79,7 +56,7 @@ fig, ax = plt.subplots()
 ax.set_title("Type-I Error")
 ax.boxplot(typeI_error.values())
 ax.set_xticklabels(typeI_error.keys())
-ax.axhline(linewidth=2, color='r')
+ax.axhline(linewidth=1, color='r')
 
 fig, ax = plt.subplots()
 ax.set_title("Power")
