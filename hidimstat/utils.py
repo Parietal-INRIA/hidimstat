@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# Author: Binh Nguyen <tuan-binh.nguyen@inria.fr> & Jerome-Alexis Chevalier
 import numpy as np
 
 
@@ -19,39 +17,6 @@ def fdr_threshold(pvals, fdr=0.1, method='bhq', reshaping_function=None):
     else:
         raise ValueError(
             '{} is not support FDR control method'.format(method))
-
-
-def cal_fdp_power(selected, non_zero_index, r_index=False):
-    """ Calculate power and False Discovery Proportion
-
-    Parameters
-    ----------
-    selected: list index (in R format) of selected non-null variables
-    non_zero_index: true index of non-null variables
-    r_index : True if the index is taken from rpy2 inference
-
-    Returns
-    -------
-    fdp: False Discoveries Proportion
-    power: percentage of correctly selected variables over total number of
-        non-null variables
-
-    """
-    # selected is the index list in R and will be different from index of
-    # python by 1 unit
-
-    if selected.size == 0:
-        return 0.0, 0.0
-
-    if r_index:
-        selected = selected - 1
-
-    true_positive = [i for i in selected if i in non_zero_index]
-    false_positive = [i for i in selected if i not in non_zero_index]
-    fdp = len(false_positive) / max(1, len(selected))
-    power = len(true_positive) / len(non_zero_index)
-
-    return fdp, power
 
 
 def _bhq_threshold(pvals, fdr=0.1):
@@ -96,15 +61,12 @@ def _bhy_threshold(pvals, reshaping_function=None, fdr=0.1):
 
 def _fixed_quantile_aggregation(pvals, gamma=0.5):
     """Quantile aggregation function based on Meinshausen et al (2008)
-
     Parameters
     ----------
     pvals : 2D ndarray (n_bootstrap, n_test)
         p-value (adjusted)
-
     gamma : float
         Percentile value used for aggregation.
-
     Returns
     -------
     1D ndarray (n_tests, )
@@ -124,3 +86,19 @@ def _adaptive_quantile_aggregation(pvals, gamma_min=0.05):
         _fixed_quantile_aggregation(pvals, gamma) for gamma in gammas])
 
     return np.minimum(1, (1 - np.log(gamma_min)) * list_Q.min(0))
+
+
+def _lambda_max(X, y, use_noise_estimate=True):
+    """Calculation of lambda_max, the smallest value of regularization parameter in
+    lasso program for non-zero coefficient
+    """
+    n_samples, _ = X.shape
+
+    if not use_noise_estimate:
+        return np.max(np.dot(X.T, y)) / n_samples
+
+    norm_y = np.linalg.norm(y, ord=2)
+    sigma_0 = (norm_y / np.sqrt(n_samples)) * 1e-3
+    sig_star = max(sigma_0, norm_y / np.sqrt(n_samples))
+
+    return np.max(np.abs(np.dot(X.T, y)) / (n_samples * sig_star))

@@ -1,6 +1,7 @@
 from .adaptive_permutation_threshold import ada_svr
 from .clustered_inference import clustered_inference, hd_inference
-from .desparsified_lasso import desparsified_group_lasso, desparsified_lasso
+from .dcrt import dcrt_zero
+from .desparsified_lasso import desparsified_lasso, desparsified_group_lasso
 from .ensemble_clustered_inference import ensemble_clustered_inference
 from .knockoffs import model_x_knockoff
 from .knockoff_aggregation import knockoff_aggregation
@@ -16,6 +17,7 @@ __all__ = [
     'ada_svr',
     'aggregate_quantiles',
     'clustered_inference',
+    'dcrt_zero',
     'desparsified_lasso',
     'desparsified_group_lasso',
     'ensemble_clustered_inference',
