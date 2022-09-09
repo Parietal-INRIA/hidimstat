@@ -1,6 +1,11 @@
-# -*- coding: utf-8 -*-
-# Author: Binh Nguyen <tuan-binh.nguyen@inria.fr> & Jerome-Alexis Chevalier
 import numpy as np
+
+
+def quantile_aggregation(pvals, gamma=0.5, gamma_min=0.05, adaptive=False):
+    if adaptive:
+        return _adaptive_quantile_aggregation(pvals, gamma_min)
+    else:
+        return _fixed_quantile_aggregation(pvals, gamma)
 
 
 def fdr_threshold(pvals, fdr=0.1, method='bhq', reshaping_function=None):
@@ -9,8 +14,6 @@ def fdr_threshold(pvals, fdr=0.1, method='bhq', reshaping_function=None):
     elif method == 'bhy':
         return _bhy_threshold(
             pvals, fdr=fdr, reshaping_function=reshaping_function)
-    elif method == 'adapt':
-        return _adapt_threshold(pvals, fdr=fdr)
     else:
         raise ValueError(
             '{} is not support FDR control method'.format(method))
@@ -56,32 +59,30 @@ def _bhy_threshold(pvals, reshaping_function=None, fdr=0.1):
             return -1.0
 
 
-def _adapt_threshold(pvals, fdr=0.1):
-    """FDR controlling with AdaPT procedure (Lei & Fithian '18), in particular
-    using the intercept only version, shown in Wang & Janson '20 section 3
+def _fixed_quantile_aggregation(pvals, gamma=0.5):
+    """Quantile aggregation function based on Meinshausen et al (2008)
+    Parameters
+    ----------
+    pvals : 2D ndarray (n_bootstrap, n_test)
+        p-value (adjusted)
+    gamma : float
+        Percentile value used for aggregation.
+    Returns
+    -------
+    1D ndarray (n_tests, )
+        Vector of aggregated p-value
     """
-    pvals_sorted = pvals[np.argsort(-pvals)]
+    converted_score = (1 / gamma) * (
+        np.percentile(pvals, q=100*gamma, axis=0))
 
-    for pv in pvals_sorted:
-        false_pos = np.sum(pvals >= 1 - pv)
-        selected = np.sum(pvals <= pv)
-        if (1 + false_pos) / np.maximum(1, selected) <= fdr:
-            return pv
-
-    return -1.0
+    return np.minimum(1, converted_score)
 
 
-def _lambda_max(X, y, use_noise_estimate=True):
-    """Calculation of lambda_max, the smallest value of regularization parameter in
-    lasso program for non-zero coefficient
-    """
-    n_samples, _ = X.shape
+def _adaptive_quantile_aggregation(pvals, gamma_min=0.05):
+    """adaptive version of the quantile aggregation method, Meinshausen et al.
+    (2008)"""
+    gammas = np.arange(gamma_min, 1.05, 0.05)
+    list_Q = np.array([
+        _fixed_quantile_aggregation(pvals, gamma) for gamma in gammas])
 
-    if not use_noise_estimate:
-        return np.max(np.dot(X.T, y)) / n_samples
-
-    norm_y = np.linalg.norm(y, ord=2)
-    sigma_0 = (norm_y / np.sqrt(n_samples)) * 1e-3
-    sig_star = max(sigma_0, norm_y / np.sqrt(n_samples))
-
-    return np.max(np.abs(np.dot(X.T, y)) / (n_samples * sig_star))
+    return np.minimum(1, (1 - np.log(gamma_min)) * list_Q.min(0))
