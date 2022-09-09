@@ -1,6 +1,6 @@
 """Implementation of distillation Conditional Randomization Test, by Liu et
 al. (2020) <https://arxiv.org/abs/2006.03980>. Currently only d0_CRT
-resampling-free is implemented.
+is implemented.
 """
 import numpy as np
 from joblib import Parallel, delayed
@@ -88,22 +88,22 @@ def dcrt_zero(X, y, fdr=0.1, estimated_coef=None, Sigma_X=None, cv=5,
             raise ValueError(f'{loss} loss is not supported.')
     else:
         raise ValueError(f'{statistic} statistic is not supported.')
-    Ts = np.zeros(n_features)
-    Ts[selection_set] = np.array([i for i in results])
+    ts = np.zeros(n_features)
+    ts[selection_set] = np.array([i for i in results])
 
     if scaled_statistics:
-        Ts = (Ts - np.mean(Ts)) / np.std(Ts)
+        ts = (ts - np.mean(ts)) / np.std(ts)
 
     if statistic in ['residual', 'randomforest']:
-        pvals = np.minimum(2 * stats.norm.sf(np.abs(Ts)), 1)
+        pvals = np.minimum(2 * stats.norm.sf(np.abs(ts)), 1)
     elif statistic == 'likelihood':
-        pvals = stats.chi2.sf(Ts, 1)
+        pvals = stats.chi2.sf(ts, 1)
 
     threshold = fdr_threshold(pvals, fdr=fdr, method=fdr_control)
     selected = np.where(pvals <= threshold)[0]
 
     if verbose:
-        return selected, pvals, Ts
+        return selected, pvals, ts
 
     return selected
 
@@ -178,9 +178,9 @@ def _lasso_distillation_residual(X, y, idx, coef_full, Sigma_X=None, cv=3,
     sigma2_y = np.mean(eps_res ** 2)
 
     # T follows Gaussian distribution
-    Ts = np.dot(eps_res, X_res) / np.sqrt(n_samples * sigma2_X * sigma2_y)
+    ts = np.dot(eps_res, X_res) / np.sqrt(n_samples * sigma2_X * sigma2_y)
 
-    return Ts
+    return ts
 
 
 def _optimal_reg_param(X, y, loss='least_square', n_regus=200, cv=5, n_jobs=1,
@@ -232,6 +232,6 @@ def _rf_distillation(X, y, idx, Sigma_X=None, coef_full=None, cv=3,
                                                 n_regus=n_regus, n_jobs=n_jobs)
 
         # T follows Gaussian distribution
-        Ts = np.dot(eps_res, X_res) / np.sqrt(n_samples * sigma2_X * sigma2_y)
+        ts = np.dot(eps_res, X_res) / np.sqrt(n_samples * sigma2_X * sigma2_y)
 
-    return Ts
+    return ts

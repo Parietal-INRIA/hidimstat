@@ -9,20 +9,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 from hidimstat.dcrt import dcrt_zero
 
-typeI_error = {"Lasso": [], "Forest":[]}
-power = {"Lasso": [], "Forest":[]}
+typeI_error = {"Lasso": [], "Forest": []}
+power = {"Lasso": [], "Forest": []}
 
 for sim_ind in range(100):
     print(f"Processing: {sim_ind+1}")
     np.random.seed(sim_ind)
 
+    # Number of observations
     n = 1000
+    # Number of variables
     p = 10
+    # Number of relevant variables
     n_signal = 2
+    # Signal-to-noise ratio
     snr = 4
+    # Correlation coefficient
     rho = 0.8
+    # Nominal false positive rate
+    alpha = 5e-2
 
-    # Create Correlation matrix with the toeplitz design
+    # Create Correlation matrix
     cov_matrix = np.zeros((p, p))
     for i in range(p):
         for j in range(p):
@@ -54,16 +61,19 @@ for sim_ind in range(100):
     y = np.array([max(0.0, i) for i in y])
 
     ## dcrt Lasso ##
-    res_lasso = dcrt_zero(X, y, screening=False, verbose=True)
-    typeI_error["Lasso"].append(sum(res_lasso[1][n_signal:] < 5e-2) / (p-n_signal))
-    power["Lasso"].append(sum(res_lasso[1][:n_signal] < 5e-2) / (n_signal))
+    results_lasso = dcrt_zero(X, y, screening=False, verbose=True)
+    typeI_error["Lasso"].append(
+        sum(results_lasso[1][n_signal:] < alpha) / (p - n_signal))
+    power["Lasso"].append(
+        sum(results_lasso[1][:n_signal] < alpha) / (n_signal))
 
     ## dcrt Random Forest ##
-    res_forest = dcrt_zero(X, y, screening=False, statistic="randomforest",
-                           verbose=True)
+    results_forest = dcrt_zero(X, y, screening=False, statistic="randomforest",
+                               verbose=True)
     typeI_error["Forest"].append(
-        sum(res_forest[1][n_signal:] < 5e-2) / (p-n_signal))
-    power["Forest"].append(sum(res_forest[1][:n_signal] < 5e-2) / (n_signal))
+        sum(results_forest[1][n_signal:] < alpha) / (p - n_signal))
+    power["Forest"].append(
+        sum(results_forest[1][:n_signal] < alpha) / (n_signal))
 
 fig, ax = plt.subplots()
 ax.set_title("Type-I Error")
