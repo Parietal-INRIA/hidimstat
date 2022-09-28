@@ -18,6 +18,7 @@ Functions
    ada_svr
    aggregate_quantiles
    clustered_inference
+   data_simulation   
    desparsified_lasso
    ensemble_clustered_inference
    group_reid
@@ -27,6 +28,5 @@ Functions
    multivariate_1D_simulation
    permutation_test_cv
    reid
-   simu_data
    standardized_svr
    zscore_from_pval
