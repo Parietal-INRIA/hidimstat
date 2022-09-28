@@ -20,7 +20,7 @@ def model_x_knockoff(X, y, fdr=0.1, offset=1, method='equi',
                      cov_estimator='ledoit_wolf', verbose=False, memory=None,
                      n_jobs=1, seed=None):
     """Model-X Knockoff inference procedure to control False Discoveries Rate,
-    based on Candes et. al. (2016)
+    based on Candes et. al. (2016) [1]_
 
     Parameters
     ----------
@@ -69,6 +69,14 @@ def model_x_knockoff(X, y, fdr=0.1, offset=1, method='equi',
 
     X_tilde : 2D array, (n_samples, n_features)
         knockoff design matrix
+
+    References
+    ----------
+
+    .. [1] Barber, R. F., & Candès, E. J. (2015). Controlling the false
+           discovery rate via knockoffs. The Annals of Statistics, 43(5),
+           2055-2085.
+
     """
     memory = check_memory(memory)
 
