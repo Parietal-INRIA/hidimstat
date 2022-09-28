@@ -22,8 +22,11 @@ Functions
    ensemble_clustered_inference
    group_reid
    hd_inference
+   knockoff_aggregation
+   model_x_knockoff
    multivariate_1D_simulation
    permutation_test_cv
    reid
+   simu_data
    standardized_svr
    zscore_from_pval
