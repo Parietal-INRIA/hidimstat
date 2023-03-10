@@ -2,11 +2,12 @@ import numpy as np
 from scipy.linalg import toeplitz
 from scipy.special import expit
 from joblib import Parallel, delayed
-from sklearn.linear_model import (LassoCV, LinearRegression,
+from sklearn.linear_model import (LassoCV, LinearRegression, Lasso,
                                   LogisticRegression, LogisticRegressionCV)
 from sklearn.linear_model import (LassoLarsCV, LassoLars)
 from sklearn.utils import check_random_state
 from tqdm import tqdm
+from statsmodels.distributions.empirical_distribution import ECDF, monotone_fn_inverter
 
 def simu_data(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, seed=None):
     """Function to simulate data follow an autoregressive structure with Toeplitz
@@ -124,8 +125,8 @@ def simu_data_conditional(X_real, beta_input=None, snr=2.0, sparsity=0.06, effec
     else:
         beta_true = beta_input
         non_zero = np.where(beta_true != 0)[0]
-        if len(non_zero) > int(sparsity * p):
-            non_zero = np.argsort(- abs(beta_true))[:int(sparsity * p)]
+        #if len(non_zero) > int(sparsity * p):
+            #non_zero = np.argsort(- abs(beta_true))[:int(sparsity * p)]
     eps = rng.standard_normal(size=n)
     prod_temp = np.dot(X, beta_true)
     noise_mag = np.linalg.norm(prod_temp) / (snr * np.linalg.norm(eps))
@@ -142,13 +143,11 @@ def conditional_sequential_gen(X, n_jobs=1, seed=None):
     rng = check_random_state(seed)
     
     n, p = X.shape
-    seeds = rng.randint(np.iinfo(np.int32).max, size=n)
 
     clfs = Parallel(n_jobs=n_jobs)(delayed(
         _get_single_clf)(X, j) for j in tqdm(range(1, p)))
 
-    samples = np.array(Parallel(n_jobs=n_jobs)(delayed(
-        _get_sample)(X, clfs, seed=seed_) for seed_ in tqdm(seeds)))
+    samples = _get_samples(X, clfs, seed=seed)
     
     return samples
 
@@ -156,23 +155,32 @@ def conditional_sequential_gen(X, n_jobs=1, seed=None):
 def _get_single_clf(X, j):
     lambda_max = np.max(np.dot(X[:, :j].T, X[:, j])) / (2 * j)
     alpha = (lambda_max / 100)
-    clf = LassoLars(alpha)
+    clf = Lasso(alpha)
     clf.fit(X[:, :j], X[:, j])
     return clf
 
 
-def _get_sample(X, clfs, seed=None):
+def _get_samples(X, clfs, seed=None):
+    np.random.seed(seed)
     n, p = X.shape
-    sample = np.zeros(p)
-    idx = np.random.randint(low=0, high=n)
-    sample[0] = X[idx][0]
-
-    for j in range(len(clfs)):
-        residuals = X[:, j + 1] - clfs[j].predict(X[:, :j + 1])
-        idx_residual = np.random.randint(low=0, high=n)
-        sample[j + 1] = clfs[j].predict(sample[:j+1].reshape(1, -1)) + residuals[idx_residual]
+    X_to_shuffle = X.copy()
+    samples = np.zeros((n, p))
     
-    return sample
+    current_col = X_to_shuffle[:, 0]
+    np.random.shuffle(current_col)
+    samples[:, 0] = current_col
+
+    for j in tqdm(range(len(clfs))):
+        residuals = X[:, j + 1] - clfs[j].predict(X[:, :j + 1])
+        indices_ = np.arange(residuals.shape[0])
+        np.random.shuffle(indices_)
+
+        samples[:, j + 1] = clfs[j].predict(samples[:, :j + 1]) + residuals[indices_]
+        c = 1
+        # samples[:, j + 1] = _adjust_marginal(samples[:, j + 1], X[:, j + 1])
+
+    
+    return samples
 
 
 def simu_data_cov(beta_input, n, p, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, n_jobs=1, seed=None):
@@ -246,3 +254,14 @@ def simu_data_cov(beta_input, n, p, snr=2.0, sparsity=0.06, effect=1.0, Sigma_re
         y = prod_temp + noise_mag * eps
 
     return X, y, beta_true, non_zero, None
+
+
+def _adjust_marginal(v, ref):
+    """
+    Make v follow the marginal of ref.
+    """
+    F = ECDF(ref)
+    G = ECDF(v)
+    G_inv = monotone_fn_inverter(G, v, vectorized=False)
+    c = 1
+    return F(G_inv(v))
