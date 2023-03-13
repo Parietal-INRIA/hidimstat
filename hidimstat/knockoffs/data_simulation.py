@@ -151,9 +151,22 @@ def conditional_sequential_gen(X, n_jobs=1, seed=None):
     
     return samples
 
+def conditional_sequential_gen_ko(X, n_jobs=1, seed=None):
+    rng = check_random_state(seed)
+    
+    n, p = X.shape
+
+    clfs = Parallel(n_jobs=n_jobs)(delayed(
+        _get_single_clf_ko)(X, j) for j in tqdm(range(p)))
+
+    samples = np.hstack(Parallel(n_jobs=n_jobs)(delayed(
+        _get_samples_ko)(X, clfs, j) for j in tqdm(range(p))))
+    
+    return samples
+
 
 def _get_single_clf(X, j):
-    lambda_max = np.max(np.dot(X[:, :j].T, X[:, j])) / (2 * j)
+    lambda_max = np.max(np.abs(np.dot(X[:, :j].T, X[:, j]))) / (2 * j)
     alpha = (lambda_max / 100)
     clf = Lasso(alpha)
     clf.fit(X[:, :j], X[:, j])
@@ -176,11 +189,36 @@ def _get_samples(X, clfs, seed=None):
         np.random.shuffle(indices_)
 
         samples[:, j + 1] = clfs[j].predict(samples[:, :j + 1]) + residuals[indices_]
-        c = 1
-        # samples[:, j + 1] = _adjust_marginal(samples[:, j + 1], X[:, j + 1])
+
+        samples[:, j + 1] = _adjust_marginal(samples[:, j + 1], X[:, j + 1])
 
     
     return samples
+
+
+def _get_single_clf_ko(X, j):
+    n, p = X.shape
+    lambda_max = np.max(np.abs(np.dot(np.delete(X, j, axis=1).T, X[:, j]))) / (2 * (p - 1))
+    alpha = (lambda_max / 100)
+    clf = Lasso(alpha)
+    clf.fit(np.delete(X, j, axis=1), X[:, j])
+    return clf
+
+
+def _get_samples_ko(X, clfs, j, seed=None):
+    np.random.seed(seed)
+    n, p = X.shape
+
+    residuals = X[:, j] - clfs[j].predict(np.delete(X, j, axis=1))
+    indices_ = np.arange(residuals.shape[0])
+    np.random.shuffle(indices_)
+
+    sample = clfs[j].predict(np.delete(X, j, axis=1)) + residuals[indices_]
+
+    sample = _adjust_marginal(sample, X[:, j])
+
+
+    return sample[np.newaxis].T
 
 
 def simu_data_cov(beta_input, n, p, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, n_jobs=1, seed=None):
@@ -242,8 +280,8 @@ def simu_data_cov(beta_input, n, p, snr=2.0, sparsity=0.06, effect=1.0, Sigma_re
     else:
         beta_true = beta_input
         non_zero = np.where(beta_true != 0)[0]
-        if len(non_zero) > int(sparsity * p):
-            non_zero = np.argsort(- abs(beta_true))[:int(sparsity * p)]
+        # if len(non_zero) > int(sparsity * p):
+            # non_zero = np.argsort(- abs(beta_true))[:int(sparsity * p)]
     eps = rng.standard_normal(size=n)
     prod_temp = np.dot(X, beta_true)
     noise_mag = np.linalg.norm(prod_temp) / (snr * np.linalg.norm(eps))
@@ -260,8 +298,12 @@ def _adjust_marginal(v, ref):
     """
     Make v follow the marginal of ref.
     """
-    F = ECDF(ref)
-    G = ECDF(v)
-    G_inv = monotone_fn_inverter(G, v, vectorized=False)
-    c = 1
-    return F(G_inv(v))
+    G = ECDF(ref)
+    F = ECDF(v)
+
+    unif_ = F(v)
+
+    # G_inv = np.argsort(G(ref))
+    G_inv = monotone_fn_inverter(G, ref)
+
+    return G_inv(unif_)
