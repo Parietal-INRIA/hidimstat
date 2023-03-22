@@ -8,6 +8,7 @@ from sklearn.linear_model import (LassoLarsCV, LassoLars)
 from sklearn.utils import check_random_state
 from tqdm import tqdm
 from statsmodels.distributions.empirical_distribution import ECDF, monotone_fn_inverter
+from line_profiler import LineProfiler
 
 def simu_data(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, seed=None):
     """Function to simulate data follow an autoregressive structure with Toeplitz
@@ -151,16 +152,25 @@ def conditional_sequential_gen(X, n_jobs=1, seed=None):
     
     return samples
 
-def conditional_sequential_gen_ko(X, n_jobs=1, seed=None):
-    rng = check_random_state(seed)
+
+def conditional_sequential_gen_ko(X, preds, n_jobs=1, seed=None):
+
+    def _francois(X, pred, j):
+        lp = LineProfiler()
+        lp_wrapper = lp(_get_samples_ko)
+        res = lp_wrapper(X, pred, j)
+        lp.print_stats()
+        return res
     
+    rng = check_random_state(seed)
     n, p = X.shape
 
-    clfs = Parallel(n_jobs=n_jobs)(delayed(
-        _get_single_clf_ko)(X, j) for j in tqdm(range(p)))
+    # samples = np.hstack(Parallel(n_jobs=n_jobs)(delayed(
+        # _francois)(X, preds[j], j) for j in tqdm(range(p))))
+
 
     samples = np.hstack(Parallel(n_jobs=n_jobs)(delayed(
-        _get_samples_ko)(X, clfs, j) for j in tqdm(range(p))))
+        _get_samples_ko)(X, preds[j], j) for j in tqdm(range(p))))
     
     return samples
 
@@ -178,7 +188,7 @@ def _get_samples(X, clfs, seed=None):
     n, p = X.shape
     X_to_shuffle = X.copy()
     samples = np.zeros((n, p))
-    
+   
     current_col = X_to_shuffle[:, 0]
     np.random.shuffle(current_col)
     samples[:, 0] = current_col
@@ -192,31 +202,36 @@ def _get_samples(X, clfs, seed=None):
 
         samples[:, j + 1] = _adjust_marginal(samples[:, j + 1], X[:, j + 1])
 
-    
     return samples
 
 
 def _get_single_clf_ko(X, j):
     n, p = X.shape
-    lambda_max = np.max(np.abs(np.dot(np.delete(X, j, axis=1).T, X[:, j]))) / (2 * (p - 1))
+    idc = np.array([i for i in np.arange(0, p) if i != j])
+    lambda_max = np.max(np.abs(np.dot(X[:, idc].T, X[:, j]))) / (2 * (p - 1))
     alpha = (lambda_max / 100)
-    clf = Lasso(alpha)
-    clf.fit(np.delete(X, j, axis=1), X[:, j])
-    return clf
+    clf = Lasso(alpha, max_iter=int(3000))
+
+    clf.fit(X[:, idc], X[:, j])
+    pred = clf.predict(X[:, idc])
+    return pred
 
 
-def _get_samples_ko(X, clfs, j, seed=None):
+def _get_samples_ko(X, pred, j, seed=None):
     np.random.seed(seed)
     n, p = X.shape
 
-    residuals = X[:, j] - clfs[j].predict(np.delete(X, j, axis=1))
+    # pred = clfs[j].predict(X[:, idc])
+
+    # pred = clfs[j].predict()
+
+    residuals = X[:, j] - pred
     indices_ = np.arange(residuals.shape[0])
     np.random.shuffle(indices_)
 
-    sample = clfs[j].predict(np.delete(X, j, axis=1)) + residuals[indices_]
+    sample = pred + residuals[indices_]
 
     sample = _adjust_marginal(sample, X[:, j])
-
 
     return sample[np.newaxis].T
 
