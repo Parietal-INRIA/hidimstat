@@ -116,6 +116,28 @@ def _empirical_pval(test_score, offset=1):
     return np.array(pvals)
 
 
+def _empirical_eval_new(test_score, offset=1):
+
+    evals = []
+    n_features = test_score.size
+
+    if offset not in (0, 1):
+        raise ValueError("'offset' must be either 0 or 1")
+
+    test_score_inv = -test_score
+    for i in range(n_features):
+        if test_score[i] <= 0:
+            evals.append(0)
+        else:
+            evals.append(
+                n_features /
+                (offset + np.sum(test_score_inv >= test_score[i]))
+                
+            )
+
+    return np.array(evals)
+
+
 def _empirical_eval(test_score, fdr=0.1, offset=1):
 
     evals = []

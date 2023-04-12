@@ -3,13 +3,15 @@ optimization scheme following Barber et al. (2015). Requires cvxopt.
 """
 
 import warnings
-
+import cvxpy as cp
 import numpy as np
+from sklearn.utils._testing import ignore_warnings
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.covariance import (GraphicalLassoCV, empirical_covariance,
-                                ledoit_wolf)
+                                ledoit_wolf)                      
 from sklearn.utils.validation import check_memory
 
-
+@ignore_warnings(category=ConvergenceWarning)
 def gaussian_knockoff_generation(X, mu, Sigma, method='equi', memory=None,
                                  seed=None):
     """Generate second-order knockoff variables using equi-correlated method.
@@ -39,6 +41,8 @@ def gaussian_knockoff_generation(X, mu, Sigma, method='equi', memory=None,
     n_samples, n_features = X.shape
     if method == 'equi':
         Diag_s = np.diag(_s_equi(Sigma))
+    elif method == 'sdp':
+        Diag_s = np.diag(memory.cache(_s_sdp)(Sigma))
     else:
         raise ValueError('{} is not a valid knockoff '
                          'contriction method'.format(method))
@@ -104,8 +108,8 @@ def _cov_to_corr(Sigma):
 
     return Corr_matrix
 
-
-def _estimate_distribution(X, shrink=False, cov_estimator='ledoit_wolf'):
+@ignore_warnings(category=ConvergenceWarning)
+def _estimate_distribution(X, shrink=True, cov_estimator='ledoit_wolf', n_jobs=1):
 
     alphas = [1e-3, 1e-2, 1e-1, 1]
 
@@ -118,7 +122,7 @@ def _estimate_distribution(X, shrink=False, cov_estimator='ledoit_wolf'):
             Sigma_shrink = ledoit_wolf(X, assume_centered=True)[0]
 
         elif cov_estimator == 'graph_lasso':
-            model = GraphicalLassoCV(alphas=alphas)
+            model = GraphicalLassoCV(alphas=alphas, n_jobs=n_jobs)
             Sigma_shrink = model.fit(X).covariance_
 
         else:
@@ -165,4 +169,49 @@ def _s_equi(Sigma):
 
     S = S * (1 - s_eps)
 
+    return S * np.diag(Sigma)
+
+
+def _s_sdp(Sigma, tol=1e-3):
+    """Estimate diagonal matrix of correlation between real and knockoff
+    variables using optimization scheme (semi-definite programming). Loosely
+    based on <https://github.com/msesia/deepknockoffs/blob/master/DeepKnockoffs/DeepKnockoffs/gaussian.py>
+
+    Parameters
+    ----------
+    Sigma : 2D ndarray (n_features, n_features)
+        empirical covariance matrix calculated from original design matrix
+    tol : float
+        tolerance threshold for the optimization scheme
+    Returns
+    -------
+    1D ndarray (n_features, )
+        vector of diagonal values of estimated matrix diag{s}
+
+    """
+    if not _is_posdef(Sigma):
+        G = _cov_to_corr(Sigma + (1e-8)*np.eye(Sigma.shape[0]))
+    else:
+        G = _cov_to_corr(Sigma)
+
+    n_features = Sigma.shape[0]
+    S = cp.Variable(n_features)
+    # The operator >> denotes matrix inequality in cvxpy, not bitwise operation
+    tol_matrix = cp.diag(tol * np.ones(n_features))
+    # Setup constraints follow the paper's problem statement
+    constraints = [
+        2 * G >> cp.diag(S) + tol_matrix,
+        0 <= S,
+        S <= 1,
+    ]
+    objective = cp.Maximize(sum(S))  # equivalent to min sum(S - 1)
+    prob = cp.Problem(objective, constraints)
+    prob.solve(solver='CVXOPT')
+
+    assert prob.status == cp.OPTIMAL
+
+    # Limit value of S inside [0, 1]
+    S = np.clip(S.value, 0, 1)
+
+    # Scale back the results for a covariance matrix
     return S * np.diag(Sigma)

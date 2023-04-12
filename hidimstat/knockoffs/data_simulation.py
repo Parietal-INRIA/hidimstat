@@ -8,7 +8,7 @@ from sklearn.linear_model import (LassoLarsCV, LassoLars)
 from sklearn.utils import check_random_state
 from tqdm import tqdm
 from statsmodels.distributions.empirical_distribution import ECDF, monotone_fn_inverter
-from line_profiler import LineProfiler
+# from line_profiler import LineProfiler
 
 def simu_data(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, seed=None):
     """Function to simulate data follow an autoregressive structure with Toeplitz
@@ -210,7 +210,7 @@ def _get_single_clf_ko(X, j):
     idc = np.array([i for i in np.arange(0, p) if i != j])
     lambda_max = np.max(np.abs(np.dot(X[:, idc].T, X[:, j]))) / (2 * (p - 1))
     alpha = (lambda_max / 100)
-    clf = Lasso(alpha, max_iter=int(3000))
+    clf = Lasso(alpha)
 
     clf.fit(X[:, idc], X[:, j])
     pred = clf.predict(X[:, idc])

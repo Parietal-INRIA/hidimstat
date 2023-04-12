@@ -3,11 +3,13 @@
 import numpy as np
 
 
-def quantile_aggregation(pvals, gamma=0.5, gamma_min=0.05, adaptive=False):
+def quantile_aggregation(pvals, gamma=0.5, gamma_min=0.05, adaptive=False, drop_gamma=False):
+    if pvals.shape[0] == 1:
+        return pvals[0]
     if adaptive:
         return _adaptive_quantile_aggregation(pvals, gamma_min)
     else:
-        return _fixed_quantile_aggregation(pvals, gamma)
+        return _fixed_quantile_aggregation(pvals, gamma, drop_gamma=drop_gamma)
 
 
 def fdr_threshold(pvals, fdr=0.1, method='bhq', reshaping_function=None):
@@ -111,7 +113,7 @@ def _bhy_threshold(pvals, reshaping_function=None, fdr=0.1):
             return -1.0
 
 
-def _fixed_quantile_aggregation(pvals, gamma=0.5):
+def _fixed_quantile_aggregation(pvals, gamma=0.5, drop_gamma=False):
     """Quantile aggregation function based on Meinshausen et al (2008)
 
     Parameters
@@ -127,8 +129,11 @@ def _fixed_quantile_aggregation(pvals, gamma=0.5):
     1D ndarray (n_tests, )
         Vector of aggregated p-value
     """
-    converted_score = (1 / gamma) * (
-        np.percentile(pvals, q=100*gamma, axis=0))
+    if drop_gamma:
+        converted_score = np.percentile(pvals, q=100*gamma, axis=0)
+    
+    else:
+        converted_score = (1 / gamma) * (np.percentile(pvals, q=100*gamma, axis=0))
 
     return np.minimum(1, converted_score)
 
