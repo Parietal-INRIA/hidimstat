@@ -153,7 +153,7 @@ def conditional_sequential_gen(X, n_jobs=1, seed=None):
     return samples
 
 
-def conditional_sequential_gen_ko(X, preds, n_jobs=1, seed=None):
+def conditional_sequential_gen_ko(X, preds, n_jobs=1, discrete=False, seed=None):
 
     def _francois(X, pred, j):
         lp = LineProfiler()
@@ -170,7 +170,7 @@ def conditional_sequential_gen_ko(X, preds, n_jobs=1, seed=None):
 
 
     samples = np.hstack(Parallel(n_jobs=n_jobs)(delayed(
-        _get_samples_ko)(X, preds[j], j) for j in tqdm(range(p))))
+        _get_samples_ko)(X, preds[j], j, discrete=discrete) for j in tqdm(range(p))))
     
     return samples
 
@@ -205,19 +205,24 @@ def _get_samples(X, clfs, seed=None):
     return samples
 
 
-def _get_single_clf_ko(X, j):
+def _get_single_clf_ko(X, j, method="lasso"):
     n, p = X.shape
     idc = np.array([i for i in np.arange(0, p) if i != j])
-    lambda_max = np.max(np.abs(np.dot(X[:, idc].T, X[:, j]))) / (2 * (p - 1))
-    alpha = (lambda_max / 100)
-    clf = Lasso(alpha)
+
+    if method == "lasso":
+        lambda_max = np.max(np.abs(np.dot(X[:, idc].T, X[:, j]))) / (2 * (p - 1))
+        alpha = (lambda_max / 100)
+        clf = Lasso(alpha)
+    
+    if method == "logreg_cv":
+        clf = LogisticRegressionCV(cv=5, max_iter=int(10e4), n_jobs=-1)
 
     clf.fit(X[:, idc], X[:, j])
     pred = clf.predict(X[:, idc])
     return pred
 
 
-def _get_samples_ko(X, pred, j, seed=None):
+def _get_samples_ko(X, pred, j, discrete=False, seed=None):
     np.random.seed(seed)
     n, p = X.shape
 
@@ -231,7 +236,14 @@ def _get_samples_ko(X, pred, j, seed=None):
 
     sample = pred + residuals[indices_]
 
-    sample = _adjust_marginal(sample, X[:, j])
+    if discrete:
+        nb_zeros = np.sum(sample == 0)
+        sorter = np.argsort(sample)
+        sample[sorter[:nb_zeros]] = 0
+        sample[sorter[nb_zeros:]] = np.max(np.unique(X))
+
+    else:
+        sample = _adjust_marginal(sample, X[:, j])
 
     return sample[np.newaxis].T
 
