@@ -3,7 +3,7 @@ optimization scheme following Barber et al. (2015). Requires cvxopt.
 """
 
 import warnings
-import cvxpy as cp
+# import cvxpy as cp
 import numpy as np
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning

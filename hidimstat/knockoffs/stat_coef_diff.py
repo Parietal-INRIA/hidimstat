@@ -72,7 +72,7 @@ def stat_coef_diff(X, X_tilde, y, alpha_chosen=None, active_set=None, method='la
     estimator = {
         'lasso_cv': LassoLarsCV(n_jobs=n_jobs, cv=cv),
         'logistic_l1': LogisticRegressionCV(
-            penalty='l1', max_iter=int(1e3),
+            penalty='l1', max_iter=int(1e4),
             solver=solver, cv=cv,
             n_jobs=n_jobs),
         'logistic_l2': LogisticRegressionCV(

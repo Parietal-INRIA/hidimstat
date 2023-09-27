@@ -74,6 +74,39 @@ def simu_data(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=Non
     return X, y, beta_true, non_zero, Sigma
 
 
+def simu_data_NG(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, seed=None):
+    """
+    """
+    # Setup seed generator
+    np.random.seed(seed)
+
+    # Number of non-null
+    k = int(sparsity * p)
+
+    # Generate the variables from a multivariate normal distribution
+    mu = np.zeros(p)
+    if Sigma_real is None:
+        Sigma = toeplitz(rho ** np.arange(0, p))  # covariance matrix of X
+    else:
+        Sigma = Sigma_real
+    # X = np.dot(np.random.normal(size=(n, p)), cholesky(Sigma))
+    X = rng.multivariate_normal(mu, Sigma, size=(n))
+    # Generate the response from a linear model
+    blob_indexes = np.linspace(0, p - 6, int(k/5), dtype=int)
+    non_zero = np.array([np.arange(i, i+5) for i in blob_indexes], dtype=int)
+    # non_zero = rng.choice(p, k, replace=False)
+    beta_true = np.zeros(p)
+    beta_true[non_zero] = effect
+    eps = rng.standard_normal(size=n)
+    prod_temp = np.dot(X, beta_true)
+    noise_mag = np.linalg.norm(prod_temp) / (snr * np.linalg.norm(eps))
+
+    y = prod_temp + noise_mag * eps
+
+    return X, y, beta_true, non_zero, Sigma
+
+
+
 def simu_data_conditional(X_real, beta_input=None, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, n_jobs=1, seed=None):
     """Function to simulate data follow an autoregressive structure with Toeplitz
     covariance matrix
