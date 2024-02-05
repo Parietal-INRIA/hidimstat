@@ -3,7 +3,7 @@ optimization scheme following Barber et al. (2015). Requires cvxopt.
 """
 
 import warnings
-# import cvxpy as cp
+import cvxpy as cp
 import numpy as np
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
@@ -215,3 +215,34 @@ def _s_sdp(Sigma, tol=1e-3):
 
     # Scale back the results for a covariance matrix
     return S * np.diag(Sigma)
+
+
+
+def solve_sdp(Sigma, tol=1e-3):
+    """
+    Computes s for sdp-correlated Gaussian knockoffs
+    :param Sigma : A covariance matrix (p x p)
+    :param mu    : An array of means (p x 1)
+    :return: A matrix of knockoff variables (n x p)
+    """
+
+    # Convert the covariance matrix to a correlation matrix
+    # Check whether Sigma is positive definite
+    if(np.min(np.linalg.eigvals(Sigma))<0):
+        corrMatrix = _cov_to_corr(Sigma + (1e-8)*np.eye(Sigma.shape[0]))
+    else:
+        corrMatrix = _cov_to_corr(Sigma)
+        
+    p,_ = corrMatrix.shape
+    s = cp.Variable(p)
+    objective = cp.Maximize(sum(s))
+    constraints = [ 2.0*corrMatrix >> cp.diag(s) + cp.diag([tol]*p), 0<=s, s<=1]
+    prob = cp.Problem(objective, constraints)
+    prob.solve(solver='CVXOPT')
+    
+    assert prob.status == cp.OPTIMAL
+
+    s = np.clip(np.asarray(s.value).flatten(), 0, 1)
+	
+    # Scale back the results for a covariance matrix
+    return np.multiply(s, np.diag(Sigma))

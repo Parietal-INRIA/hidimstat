@@ -83,7 +83,9 @@ def stat_coef_diff(X, X_tilde, y, alpha_chosen=None, active_set=None, method='la
         'enet': ElasticNetCV(cv=cv, max_iter=int(1e4), tol=1e-6,
                              n_jobs=n_jobs, verbose=joblib_verbose),
         'xgb' : XGBRegressor(n_jobs=n_jobs, booster='gblinear'),
-        'linear_reg': LinearRegression(n_jobs=n_jobs)
+        'linear_reg': LinearRegression(n_jobs=n_jobs),
+        'ridge': RidgeCV([1, 5, 10, 20, 50, 100], cv=cv),
+        'lasso_no_cv': Lasso(alpha=1e-5,max_iter=int(1e4)),
 
 
     }

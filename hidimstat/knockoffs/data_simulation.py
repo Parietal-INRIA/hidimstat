@@ -10,7 +10,8 @@ from tqdm import tqdm
 from statsmodels.distributions.empirical_distribution import ECDF, monotone_fn_inverter
 # from line_profiler import LineProfiler
 
-def simu_data(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, seed=None):
+
+def simu_data(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=None, binarize=False, no_blobs=False, seed=None):
     """Function to simulate data follow an autoregressive structure with Toeplitz
     covariance matrix
 
@@ -57,9 +58,12 @@ def simu_data(n, p, rho=0.25, snr=2.0, sparsity=0.06, effect=1.0, Sigma_real=Non
     # X = np.dot(np.random.normal(size=(n, p)), cholesky(Sigma))
     X = rng.multivariate_normal(mu, Sigma, size=(n))
     # Generate the response from a linear model
-    blob_indexes = np.linspace(0, p - 6, int(k/5), dtype=int)
-    non_zero = np.array([np.arange(i, i+5) for i in blob_indexes], dtype=int)
-    # non_zero = rng.choice(p, k, replace=False)
+
+    if no_blobs:
+        non_zero = rng.choice(p, k, replace=False)
+    else:
+        blob_indexes = np.linspace(0, p - 6, int(k/5), dtype=int)
+        non_zero = np.array([np.arange(i, i+5) for i in blob_indexes], dtype=int)
     beta_true = np.zeros(p)
     beta_true[non_zero] = effect
     eps = rng.standard_normal(size=n)
@@ -186,7 +190,7 @@ def conditional_sequential_gen(X, n_jobs=1, seed=None):
     return samples
 
 
-def conditional_sequential_gen_ko(X, preds, n_jobs=1, discrete=False, seed=None):
+def conditional_sequential_gen_ko(X, preds, n_jobs=1, discrete=False, adjust_marg=True, seed=None):
 
     def _francois(X, pred, j):
         lp = LineProfiler()
@@ -203,7 +207,7 @@ def conditional_sequential_gen_ko(X, preds, n_jobs=1, discrete=False, seed=None)
 
 
     samples = np.hstack(Parallel(n_jobs=n_jobs)(delayed(
-        _get_samples_ko)(X, preds[j], j, discrete=discrete) for j in tqdm(range(p))))
+        _get_samples_ko)(X, preds[j], j, discrete=discrete, adjust_marg=adjust_marg) for j in tqdm(range(p))))
     
     return samples
 
@@ -255,7 +259,7 @@ def _get_single_clf_ko(X, j, method="lasso"):
     return pred
 
 
-def _get_samples_ko(X, pred, j, discrete=False, seed=None):
+def _get_samples_ko(X, pred, j, discrete=False, adjust_marg=True, seed=None):
     np.random.seed(seed)
     n, p = X.shape
 
@@ -276,7 +280,10 @@ def _get_samples_ko(X, pred, j, discrete=False, seed=None):
         sample[sorter[nb_zeros:]] = np.max(np.unique(X))
 
     else:
-        sample = _adjust_marginal(sample, X[:, j])
+        if adjust_marg:
+            sample = _adjust_marginal(sample, X[:, j])
+        else:
+            sample = sample
 
     return sample[np.newaxis].T
 
