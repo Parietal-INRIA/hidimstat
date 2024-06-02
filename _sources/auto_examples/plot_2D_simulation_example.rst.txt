@@ -10,8 +10,8 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_plot_2D_simulation_example.py>`
-        to download the full example code
+        :ref:`Go to the end <sphx_glr_download_auto_examples_plot_2D_simulation_example.py>`
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -51,7 +51,7 @@ Chevalier et al. (2021) [1]_). Indeed, when the number of features is much
 greater than the number of samples, standard statistical methods are
 unlikely to recover the support. Then, the idea of clustered inference is to
 compress the data without breaking the spatial structure, leading to a
-compressed problem  close to the original problem. This leads to a
+compressed problem  close to the original problem. This results in a more
 powerful spatially relaxed inference. Indeed, thanks to the dimension reduction
 the support recovery is feasible. However, due to the spatial compression,
 there is a limited (and quantifiable) spatial uncertainty concerning the shape
@@ -75,7 +75,7 @@ Imports needed for this script
 
 .. GENERATED FROM PYTHON SOURCE LINES 57-69
 
-.. code-block:: default
+.. code-block:: Python
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -107,9 +107,9 @@ you can skip this section.
 The following function builds a 2D map with four active regions that are
 enfolded by thin tolerance regions.
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-108
+.. GENERATED FROM PYTHON SOURCE LINES 78-110
 
-.. code-block:: default
+.. code-block:: Python
 
 
 
@@ -118,6 +118,7 @@ enfolded by thin tolerance regions.
 
         roi_size_extended = roi_size + delta
 
+        # Create four regions in the corners
         w = np.zeros(shape + (5,))
         w[0:roi_size, 0:roi_size, 0] = 0.5
         w[-roi_size:, -roi_size:, 1] = 0.5
@@ -128,6 +129,7 @@ enfolded by thin tolerance regions.
         w[0:roi_size_extended, -roi_size_extended:, 2] += 0.5
         w[-roi_size_extended:, 0:roi_size_extended, 3] += 0.5
 
+        # round the shape a little bit
         for i in range(roi_size_extended):
             for j in range(roi_size_extended):
                 if (i - roi_size) + (j - roi_size) >= delta:
@@ -148,14 +150,14 @@ enfolded by thin tolerance regions.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 109-111
+.. GENERATED FROM PYTHON SOURCE LINES 111-113
 
 To generate a plot that exhibits the true support and the estimated
 supports for every method, we define the two following functions:
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-154
+.. GENERATED FROM PYTHON SOURCE LINES 113-151
 
-.. code-block:: default
+.. code-block:: Python
 
 
 
@@ -180,7 +182,7 @@ supports for every method, we define the two following functions:
             ax.get_yaxis().set_visible(False)
 
 
-    def plot(maps, titles, save_fig=False):
+    def plot(maps, titles):
         '''Make a summary plot from estimated supports'''
 
         fig, axes = plt.subplots(3, 2, figsize=(4, 6))
@@ -192,11 +194,6 @@ supports for every method, we define the two following functions:
 
         fig.tight_layout()
 
-        if save_fig:
-            figname = 'figures/simu_2D.png'
-            plt.savefig(figname)
-            print(f'Save figure to {figname}')
-
         plt.show()
 
 
@@ -207,7 +204,7 @@ supports for every method, we define the two following functions:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 155-161
+.. GENERATED FROM PYTHON SOURCE LINES 152-158
 
 Generating the data
 -------------------
@@ -216,9 +213,9 @@ After setting the simulation parameters, we run the function that generates
 the 2D scenario that we have briefly described in the first section of this
 example.
 
-.. GENERATED FROM PYTHON SOURCE LINES 161-175
+.. GENERATED FROM PYTHON SOURCE LINES 158-172
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # simulation parameters
@@ -241,7 +238,7 @@ example.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 176-194
+.. GENERATED FROM PYTHON SOURCE LINES 173-190
 
 Choosing inference parameters
 -----------------------------
@@ -258,13 +255,12 @@ Theoretically, the spatial tolerance ``delta`` is equal to the largest
 cluster diameter. However this choice is conservative, notably in the case
 of ensembled clustered inference. For these algorithms, we recommend to take
 the average cluster radius. In this example, we choose ``n_clusters = 200``,
-leading to a theoretical spatial tolerance ``delta = 6``. However, it
-turns out that ``delta = 2``, the average cluster radius, would have been
-sufficient for ensembled clustered inference algorithms (see Results).
+leading to a theoretical spatial tolerance ``delta = 6``, which is still
+conservative (see Results).
 
-.. GENERATED FROM PYTHON SOURCE LINES 194-205
+.. GENERATED FROM PYTHON SOURCE LINES 190-201
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # hyper-parameters
@@ -284,22 +280,22 @@ sufficient for ensembled clustered inference algorithms (see Results).
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 206-216
+.. GENERATED FROM PYTHON SOURCE LINES 202-212
 
 Computing z-score thresholds for support estimation
 ---------------------------------------------------
 
 Below, we translate the FWER target into z-score targets.
 To compute the z-score targets we also take into account for the multiple
-testing correction. To do so, we consider the Bonferroni correction.
+testing correction. To do so, we consider Bonferroni correction.
 For methods that do not reduce the feature space, the correction
-consists in dividing the FWER target by the number of features.
+consists in dividing the targeted FWER target by the number of features.
 For methods that group features into clusters, the correction
 consists in dividing by the number of clusters.
 
-.. GENERATED FROM PYTHON SOURCE LINES 216-224
+.. GENERATED FROM PYTHON SOURCE LINES 212-220
 
-.. code-block:: default
+.. code-block:: Python
 
 
 
@@ -316,7 +312,7 @@ consists in dividing by the number of clusters.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 225-230
+.. GENERATED FROM PYTHON SOURCE LINES 221-226
 
 Inference with several algorithms
 ---------------------------------
@@ -324,9 +320,9 @@ Inference with several algorithms
 First, we compute a reference map that exhibits the true support and
 the theoretical tolerance region.
 
-.. GENERATED FROM PYTHON SOURCE LINES 230-234
+.. GENERATED FROM PYTHON SOURCE LINES 226-230
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # compute true support with visible spatial tolerance
@@ -339,7 +335,7 @@ the theoretical tolerance region.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 235-241
+.. GENERATED FROM PYTHON SOURCE LINES 231-237
 
 Now, we compute the support estimated by a high-dimensional statistical
 infernece method that does not leverage the data structure. This method
@@ -348,9 +344,9 @@ and Van de Geer, S. et al.. (2014) (full references are available at
 https://Parietal-INRIA.github.io/hidimstat/).
 and referred to as Desparsified Lasso.
 
-.. GENERATED FROM PYTHON SOURCE LINES 241-255
+.. GENERATED FROM PYTHON SOURCE LINES 237-251
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # compute desparsified lasso
@@ -370,27 +366,18 @@ and referred to as Desparsified Lasso.
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 256-259
+.. GENERATED FROM PYTHON SOURCE LINES 252-255
 
 Now, we compute the support estimated using a clustered inference algorithm
 (c.f. :ref:`References`) called Clustered Desparsified Lasso (CluDL) since it
 uses the Desparsified Lasso technique after clustering the data.
 
-.. GENERATED FROM PYTHON SOURCE LINES 259-280
+.. GENERATED FROM PYTHON SOURCE LINES 255-276
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Define the FeatureAgglomeration object that performs the clustering.
@@ -422,15 +409,11 @@ uses the Desparsified Lasso technique after clustering the data.
  .. code-block:: none
 
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 0
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 281-286
+.. GENERATED FROM PYTHON SOURCE LINES 277-282
 
 Finally, we compute the support estimated by an ensembled clustered
 inference algorithm (c.f. :ref:`References`). This algorithm is called
@@ -438,9 +421,9 @@ Ensemble of Clustered Desparsified Lasso (EnCluDL) since it runs several
 CluDL algorithms with different clustering choices. The different CluDL
 solutions are then aggregated into one.
 
-.. GENERATED FROM PYTHON SOURCE LINES 286-296
+.. GENERATED FROM PYTHON SOURCE LINES 282-292
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # ensemble of clustered desparsified lasso (EnCluDL)
@@ -460,138 +443,36 @@ solutions are then aggregated into one.
 
  .. code-block:: none
 
-    [Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 0
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 1
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 2
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 3
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 4
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 5
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 6
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 7
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 8
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 9
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 10
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 11
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 12
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 13
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 14
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 15
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 16
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 17
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 18
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 19
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 20
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 21
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 22
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 23
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
     Clustered inference: n_clusters = 200, inference method = desparsified-lasso, seed = 24
-    /home/runner/work/hidimstat/hidimstat/hidimstat/desparsified_lasso.py:32: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
-      results = np.asarray(results)
-    /home/runner/.local/lib/python3.8/site-packages/sklearn/linear_model/_base.py:148: FutureWarning: 'normalize' was deprecated in version 1.0 and will be removed in 1.2. Please leave the normalize parameter to its default value to silence this warning. The default behavior of this estimator is to not do any normalization. If normalization is needed please use sklearn.preprocessing.StandardScaler instead.
-      warnings.warn(
-    [Parallel(n_jobs=1)]: Done  25 out of  25 | elapsed:   30.6s finished
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 297-302
+.. GENERATED FROM PYTHON SOURCE LINES 293-298
 
 Results
 -------
@@ -599,9 +480,9 @@ Results
 Now we plot the true support, the theoretical tolerance regions and
 the estimated supports for every method.
 
-.. GENERATED FROM PYTHON SOURCE LINES 302-326
+.. GENERATED FROM PYTHON SOURCE LINES 298-322
 
-.. code-block:: default
+.. code-block:: Python
 
 
     maps = []
@@ -639,27 +520,28 @@ the estimated supports for every method.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 327-339
+.. GENERATED FROM PYTHON SOURCE LINES 323-336
 
 Analysis of the results
 -----------------------
-As argued in the first section of this example, the standard method that
-do not compress the problem is not relevant as it dramatically lacks power.
+As argued in the first section of this example, standard inference methods that
+do not compress the problem dramatically lack power.
 The support estimated from CluDL provides a more reasonable solution
 since we recover the four regions. However the shape of the estimated support
-is a bit rough.
+is a bit rough (as it is bound to a sub-optimal clustering).
 Finally, the solution provided by EnCluDL is more accurate since the shape
 of the estimated support is closer to the true support.
 Also, one can note that the theoretical spatial tolerance is quite
-conservative. In practice, we argue that the statistical guarantees are valid
-for a lower spatial tolerance thanks to the clustering randomization.
+conservative. In practice, Type-1 Error guarantees seem to hold
+for a lower spatial tolerance. This is an additional benefit of clustering
+randomization.
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  19.442 seconds)
+   **Total running time of the script:** (1 minutes 3.008 seconds)
 
-**Estimated memory usage:**  117 MB
+**Estimated memory usage:**  49 MB
 
 
 .. _sphx_glr_download_auto_examples_plot_2D_simulation_example.py:
@@ -668,14 +550,13 @@ for a lower spatial tolerance thanks to the clustering randomization.
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_2D_simulation_example.ipynb <plot_2D_simulation_example.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_2D_simulation_example.py <plot_2D_simulation_example.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_2D_simulation_example.ipynb <plot_2D_simulation_example.ipynb>`
 
 
 .. only:: html

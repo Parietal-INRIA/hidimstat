@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>HiDimStat: High-dimensional statistical inference tool for Python &#8212; hidimstat 0.1.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <link rel="stylesheet" type="text/css" href="_static/style.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=284a2d1d" />
+    <link rel="stylesheet" type="text/css" href="_static/style.css?v=fbda0898" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="API Documentation" href="api.html" />
@@ -91,16 +89,50 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">HiDimStat: High-dimensional statistical inference tool for Python</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#documentation-examples">Documentation &amp; Examples</a></li>
+<li><a class="reference internal" href="#build-the-documentation">Build the documentation</a></li>
+<li><a class="reference internal" href="#references">References</a><ul>
+<li><a class="reference internal" href="#main-references">Main references</a></li>
+<li><a class="reference internal" href="#other-useful-references">Other useful references</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+</ul>
+
+  <li>
+    <a href="api.html" title="Next Chapter: API Documentation"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">API Documentation &raquo;</span>
+    </a>
+  </li>
+<div id="sourcelink">
+  <a href="_sources/index.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="hidimstat-high-dimensional-statistical-inference-tool-for-python">
-<h1>HiDimStat: High-dimensional statistical inference tool for Python<a class="headerlink" href="#hidimstat-high-dimensional-statistical-inference-tool-for-python" title="Permalink to this heading">¶</a></h1>
+<h1>HiDimStat: High-dimensional statistical inference tool for Python<a class="headerlink" href="#hidimstat-high-dimensional-statistical-inference-tool-for-python" title="Link to this heading">¶</a></h1>
 <p><a class="reference external" href="https://codecov.io/gh/Parietal-INRIA/hidimstat"><img alt="Build Status" src="https://travis-ci.com/Parietal-INRIA/hidimstat.svg?branch=main" /></a> <a class="reference external" href="https://codecov.io/gh/Parietal-INRIA/hidimstat"><img alt="codecov" src="https://codecov.io/gh/Parietal-INRIA/hidimstat/branch/main/graph/badge.svg" /></a></p>
 <p>The HiDimStat package provides statistical inference methods to solve the
 problem of support recovery in the context of high-dimensional and
 spatially structured data.</p>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
 <p>HiDimStat working only with Python 3, ideally Python 3.6+. For installation,
 run the following from terminal:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">hidimstat</span>
@@ -115,7 +147,7 @@ the development of this project):</p>
 </div>
 </section>
 <section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">¶</a></h2>
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h2>
 <p>HiDimStat depends on the following packages:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">joblib</span>
 <span class="n">numpy</span>
@@ -127,7 +159,7 @@ the development of this project):</p>
 is also needed to install <code class="docutils literal notranslate"><span class="pre">pytest</span></code>.</p>
 </section>
 <section id="documentation-examples">
-<h2>Documentation &amp; Examples<a class="headerlink" href="#documentation-examples" title="Permalink to this heading">¶</a></h2>
+<h2>Documentation &amp; Examples<a class="headerlink" href="#documentation-examples" title="Link to this heading">¶</a></h2>
 <p>Documentation about the main HiDimStat functions is available
 <a class="reference external" href="api.html">here</a> and examples are available <a class="reference external" href="auto_examples/index.html">here</a>.</p>
 <p>As of now, there are three different examples (Python scripts) that
@@ -144,7 +176,7 @@ MEG/EEG datasets.</p>
 </div>
 </section>
 <section id="build-the-documentation">
-<h2>Build the documentation<a class="headerlink" href="#build-the-documentation" title="Permalink to this heading">¶</a></h2>
+<h2>Build the documentation<a class="headerlink" href="#build-the-documentation" title="Link to this heading">¶</a></h2>
 <p>To build the documentation you will need to run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">sphinx_gallery</span> <span class="n">sphinx_bootstrap_theme</span>
 <span class="n">cd</span> <span class="n">doc</span>
@@ -153,12 +185,12 @@ MEG/EEG datasets.</p>
 </div>
 </section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">¶</a></h2>
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <p>The algorithms developed in this package have been detailed in several
 conference/journal articles that can be downloaded at
 <a class="reference external" href="https://Parietal-INRIA.github.io/research.html">https://Parietal-INRIA.github.io/</a>.</p>
 <section id="main-references">
-<h3>Main references<a class="headerlink" href="#main-references" title="Permalink to this heading">¶</a></h3>
+<h3>Main references<a class="headerlink" href="#main-references" title="Link to this heading">¶</a></h3>
 <p>Ensemble of Clustered desparsified Lasso (ECDL):</p>
 <ul class="simple">
 <li><p>Chevalier, J. A., Salmon, J., &amp; Thirion, B. (2018). Statistical inference
@@ -188,11 +220,24 @@ Statistical control for spatio-temporal MEG/EEG source imaging with
 desparsified multi-task Lasso. In Proceedings of the 34th Conference on
 Neural Information Processing Systems (NeurIPS 2020), Vancouver, Canada.</p></li>
 </ul>
+<p>Single/Group statistically validated importance using conditional permutations:</p>
+<ul class="simple">
+<li><p>Chamma, A., Thirion, B., &amp; Engemann, D. (2024). <a href="#id2"><span class="problematic" id="id3">**</span></a>Variable importance in</p></li>
+</ul>
+<p>high-dimensional settings requires grouping**. In Proceedings of the 38th
+Conference of the Association for the Advancement of Artificial
+Intelligence(AAAI 2024), Vancouver, Canada.</p>
+<ul class="simple">
+<li><p>Chamma, A., Engemann, D., &amp; Thirion, B. (2023). <a href="#id4"><span class="problematic" id="id5">**</span></a>Statistically Valid Variable</p></li>
+</ul>
+<p>Importance Assessment through Conditional Permutations**. In Proceedings of the
+37th Conference on Neural Information Processing Systems (NeurIPS 2023), New
+Orleans, USA.</p>
 <p>If you use our packages, we would appreciate citations to the relevant
 aforementioned papers.</p>
 </section>
 <section id="other-useful-references">
-<h3>Other useful references<a class="headerlink" href="#other-useful-references" title="Permalink to this heading">¶</a></h3>
+<h3>Other useful references<a class="headerlink" href="#other-useful-references" title="Link to this heading">¶</a></h3>
 <p>For de-sparsified(or de-biased) Lasso:</p>
 <ul class="simple">
 <li><p>Javanmard, A., &amp; Montanari, A. (2014). Confidence intervals and hypothesis
@@ -217,7 +262,7 @@ Royal Statistical Society Series B, 80(3), 551-577.</p></li>
 </section>
 </section>
 <section id="api">
-<h2>API<a class="headerlink" href="#api" title="Permalink to this heading">¶</a></h2>
+<h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
@@ -239,7 +284,7 @@ Royal Statistical Society Series B, 80(3), 551-577.</p></li>
     </p>
     <p>
         &copy; Copyright 2020, Jerome-Alexis Chevalier &amp; Binh Nguyen.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.3.7.<br/>
     </p>
   </div>
 </footer>
