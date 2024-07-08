@@ -46,12 +46,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: DocHTML
-          path: doc/_build/html
+          path: ~/doc/_build/html
       - name: Commit to main
         run: |
           git clone --depth 1 https://github.com/${{ github.repository_owner }}/hidimstat.git
-          rm -Rf hidimstat/doc/_build
-          cp -a doc/_build/html/* hidimstat/doc/_build
+          rm -Rf ~/hidimstat/doc/_build
+          cp -a ~/doc/_build/html ~/hidimstat/doc/_build
           cd main
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub actions"
