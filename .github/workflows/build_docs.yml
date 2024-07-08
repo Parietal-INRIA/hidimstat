@@ -48,7 +48,6 @@ jobs:
           name: DocHTML
           path: doc/_build/html
       - name: Commit to main
-      - name: Commit to documentation branch
         run: |
           git clone --depth 1 https://github.com/${{ github.repository_owner }}/hidimstat.git
           cp -r doc/_build/html/* main/doc/_build
