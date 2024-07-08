@@ -51,6 +51,8 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/${{ github.repository_owner }}/hidimstat.git
           ls -a
+          ls hidimstat
+          ls hidimstat/doc
           rm -Rf ~/hidimstat/doc/_build
           mkdir ~/hidimstat/doc/_build
           cp -a ~/doc/_build/html ~/hidimstat/doc/_build
