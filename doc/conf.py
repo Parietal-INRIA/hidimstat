@@ -70,8 +70,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'hidimstat'
-copyright = u'2020, Jerome-Alexis Chevalier & Binh Nguyen'
-author = u'Jerome-Alexis Chevalier & Binh Nguyen'
+copyright = u'2024, Parietal-INRIA'
+author = u'Parietal-INRIA'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
