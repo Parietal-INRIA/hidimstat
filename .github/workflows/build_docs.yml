@@ -42,40 +42,24 @@ jobs:
     needs: [build_docs]
     if: ${{ contains(fromJSON('["push", "workflow_dispatch", "schedule"]'), github.event_name)}}
     steps:
-      - name: Add SSH key
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          echo "${{ secrets.ACTIONS_SSH_DEPLOY }}" > ~/.ssh/github_actions
-          chmod 600 ~/.ssh/github_actions
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add ~/.ssh/github_actions
-
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: DocHTML
           path: ~/doc/_build/html
-      - name: Commit to documentation branch
+      - name: Commit to main
         run: |
+          git clone --depth 1 https://github.com/${{ github.repository_owner }}/hidimstat.git
+          cp -r doc/_build/html/* main/
+          cd main
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub actions"
+          git add .
+          git commit -m "Update documentation" -a || true
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: main
+          directory: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           
-          git clone git@github.com:hidimstat/hidimstat.github.io.git ~/hidimstat.github.io --depth=1
-          cd ~/hidimstat.github.io;
-          
-          git checkout main
-
-          git remote -v
-
-          git fetch origin
-          git reset --hard origin/main
-
-          echo "Deploying dev docs.";
-          rm -Rf dev;
-          cp -a ~/doc/_build/html dev;
-          git add -A;
-          git commit -m "Dev docs https://github.com/hidimstat/hidimstat/commit/${{ github.event.head_commit.id }} : ${{ github.event.head_commit.message }}";
-          git push origin main;
