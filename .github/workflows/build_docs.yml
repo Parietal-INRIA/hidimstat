@@ -49,9 +49,11 @@ jobs:
           path: doc/_build/html
       - name: Commit to main
         run: |
-          git clone --no-checkout --depth 1 https://github.com/${{ github.repository_owner }}/hidimstat.git --branch gh-pages_1 --single-branch gh-pages_1
-          cp -r doc/_build/html/* gh-pages_1/
-          cd gh-pages_1
+          git clone --depth 1 https://github.com/${{ github.repository_owner }}/hidimstat.git
+          rm -Rf hidimstat/docs
+          mkdir hidimstat/docs
+          cp -r doc/_build/html hidimstat/docs
+          cd hidimstat
           touch .nojekyll
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub actions"
@@ -60,7 +62,7 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          branch: gh-pages_1
-          directory: gh-pages_1
+          branch: main
+          directory: hidimstat
           github_token: ${{ secrets.GITHUB_TOKEN }}
           
