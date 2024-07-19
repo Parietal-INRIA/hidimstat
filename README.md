@@ -1,3 +1,4 @@
+# This repo has been moved to [https](https://github.com/mind-inria/hidimstat)
 # HiDimStat: High-dimensional statistical inference tool for Python
 [![Build](https://github.com/Parietal-INRIA/hidimstat/actions/workflows/build_package.yml/badge.svg?branch=main)](https://github.com/Parietal-INRIA/hidimstat/actions/workflows/build_package.yml)  [![codecov](https://codecov.io/gh/Parietal-INRIA/hidimstat/branch/main/graph/badge.svg?token=979G94XCE7)](https://codecov.io/gh/Parietal-INRIA/hidimstat) [![CodeStyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
